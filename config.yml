@@ -1,0 +1,76 @@
+mqtt:
+  enabled: false
+
+detectors: # required
+  rknn: # required
+    type: rknn # required
+    # number of NPU cores to use
+    # 0 means choose automatically
+    # increase for better performance if you have a multicore NPU e.g. set to 3 on rk3588
+    num_cores: 3
+
+model: # required
+  # name of model (will be automatically downloaded) or path to your own .rknn model file
+  # possible values are:
+  # - deci-fp16-yolonas_s
+  # - deci-fp16-yolonas_m
+  # - deci-fp16-yolonas_l
+  # your yolonas_model.rknn
+  path: deci-fp16-yolonas_s
+  model_type: yolonas
+  width: 320
+  height: 320
+  input_pixel_format: bgr
+  input_tensor: nhwc
+  labelmap_path: /labelmap/coco-80.txt
+
+ffmpeg:
+  hwaccel_args: preset-rkmpp
+
+go2rtc:
+  streams:
+    back:
+      - rtsp://<user:password@IP>/stream1
+
+live:
+  streams: # <--- Multiple streams for Frigate 0.16 and later
+    Main Stream: back
+
+cameras:
+  Hallway: # <------ Name the camera
+    enabled: true
+    ffmpeg:
+      hwaccel_args: preset-rkmpp
+      inputs:
+        - path: rtsp://<user:password@IP>/stream2 # <----- The stream you want to use for detection
+          roles:
+            - detect
+        - path: rtsp://<user:password@IP>/stream1 # <----- Add stream you want to record from
+          roles:
+            - record
+    detect:
+      enabled: true # <---- disable detection until you have a working camera feed
+      width: 1280
+      height: 720
+      fps: 5
+
+record:
+  enabled: true
+  retain:
+    days: 0                     # no 24/7 keep
+  detections:
+    retain:
+      days: 14                  # keep detected-object segments 14 days
+      mode: active_objects      # keep only segments with true, non-stationary objects
+    pre_capture: 5              # include 5s before the object appears
+    post_capture: 10            # and 10s after it’s gone
+
+objects:
+  track:                # humans + COCO animal classes Frigate knows
+    - person
+    - cat
+    - dog
+    - bird
+
+version: 0.16-0
+
