@@ -29,23 +29,27 @@ ffmpeg:
 
 go2rtc:
   streams:
-    back:
-      - rtsp://<user:password@IP>/stream1
+    hallway_main:
+      - rtsp://{$URL}
+    hallway_sub:
+      - rtsp://{$URL_sub}
 
 live:
   streams: # <--- Multiple streams for Frigate 0.16 and later
-    Main Stream: back
+    Hallway (main): hallway_main
 
 cameras:
   Hallway: # <------ Name the camera
     enabled: true
     ffmpeg:
-      hwaccel_args: preset-rkmpp
+      # hwaccel_args: preset-rkmpp
       inputs:
-        - path: rtsp://<user:password@IP>/stream2 # <----- The stream you want to use for detection
+        - path: rtsp://127.0.0.1:8554/hallway_sub # <----- The stream you want to use for detection; the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
           roles:
             - detect
-        - path: rtsp://<user:password@IP>/stream1 # <----- Add stream you want to record from
+        - path: rtsp://127.0.0.1:8554/hallway_main # <----- Add stream you want to record from; the name here must match the name of the camera_sub in restream
+          input_args: preset-rtsp-restream
           roles:
             - record
     detect:
@@ -73,4 +77,3 @@ objects:
     - bird
 
 version: 0.16-0
-
