@@ -34,10 +34,6 @@ go2rtc:
     hallway_sub:
       - rtsp://{$URL_sub}
 
-live:
-  streams: # <--- Multiple streams for Frigate 0.16 and later
-    Hallway (main): hallway_main
-
 cameras:
   Hallway: # <------ Name the camera
     enabled: true
@@ -52,6 +48,9 @@ cameras:
           input_args: preset-rtsp-restream
           roles:
             - record
+    live:
+      streams:
+        Guest: hallway_main
     detect:
       enabled: true # <---- disable detection until you have a working camera feed
       width: 1280
